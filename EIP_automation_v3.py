@@ -35,8 +35,7 @@ parser.add_argument("-a", "--arista", help="Run only for Arista devices", action
 parser.add_argument("-r", "--cisco_xr", help="Run only for Cisco XR devices", action="store_true")
 parser.add_argument("-e", "--cisco_xe", help="Run only for Cisco XE devices", action="store_true")
 parser.add_argument("-t", "--a10", help="Run only for a10 devices", action="store_true")
-parser.add_argument("-d", "--all", help="Run program for all devices", action="store_true")
-parser.add_argument("-n", "--command", required=False, help="Specify single show command to run")
+parser.add_argument("-n", "--command", required=False, help="Specify single SHOW command to be fetched")
 args = parser.parse_args()
 send = vars(parser.parse_args())
 
@@ -71,7 +70,7 @@ def run_script(host_ip, vendor, cmds):
         "ip": host_ip,
         "username": uname,
         "password": passwd,
-        "session_log": str(date)+"_"+str(vendor)+"_"+str(host_ip)+"_"+str(hour)+".txt",
+        "session_log": (str(date)+"_"+str(vendor)+"_"+(str(host_ip)).strip()+"_"+str(hour)+".txt").replace(" ", ""),
         "secret": secret
         }
 
@@ -123,7 +122,7 @@ def run_script(host_ip, vendor, cmds):
 #Running function for each device
 
 
-if (args.arista and args.show) or (args.all and args.show) or (args.arista and args.conf) or (args.arista and args.cisco_xr and args.show) or (args.arista and args.cisco_xe and args.show):
+if (args.arista and args.show)  or (args.arista and args.conf) or (args.arista and args.cisco_xr and args.show) or (args.arista and args.cisco_xe and args.show):
     hosts_arista = open('arista.txt').readlines()
     cmd_arista = open('arista_cmd.txt').readlines()
     arista = "arista_eos"
@@ -131,7 +130,7 @@ if (args.arista and args.show) or (args.all and args.show) or (args.arista and a
         run_script(ip, arista, cmd_arista)
         sleep(2)
 
-if (args.a10 and args.show) or (args.all and args.show) or (args.a10 and args.conf) or (args.a10 and args.arista and args.cisco_xr and args.show) or (args.a10 and args.arista and args.cisco_xe and args.show):
+if (args.a10 and args.show)  or (args.a10 and args.conf) or (args.a10 and args.arista and args.cisco_xr and args.show) or (args.a10 and args.arista and args.cisco_xe and args.show):
     hosts_a10 = open('a10.txt').readlines()
     cmd_a10 = open('a10_cmd.txt').readlines()
     a10 = "a10"
@@ -139,7 +138,7 @@ if (args.a10 and args.show) or (args.all and args.show) or (args.a10 and args.co
         run_script(ip, a10, cmd_a10)
         sleep(2)
 
-if (args.cisco_xr and args.show) or (args.all and args.show) or (args.cisco_xr and args.conf) or (args.a10 and args.arista and args.cisco_xr and args.show):
+if (args.cisco_xr and args.show) or (args.cisco_xr and args.conf) or (args.a10 and args.arista and args.cisco_xr and args.show) or (args.a10 and args.arista and args.cisco_xr and args.cisco_xe and args.show):
     hosts_cisco_xr = open('cisco_xr.txt').readlines()
     cmd_cisco_xr = open('cisco_cmd_xr.txt').readlines()
     cisco_xr =  "cisco_xr"
@@ -147,7 +146,7 @@ if (args.cisco_xr and args.show) or (args.all and args.show) or (args.cisco_xr a
         run_script(ip, cisco_xr, cmd_cisco_xr)
         sleep(2)
 
-if (args.cisco_xe and args.show) or (args.all and args.show) or (args.cisco_xe and args.conf) or (args.cisco_xe and args.arista and args.show) or (args.a10 and args.arista and args.cisco_xe and args.show):
+if (args.cisco_xe and args.show) or (args.cisco_xe and args.conf) or (args.cisco_xe and args.arista and args.show) or (args.a10 and args.arista and args.cisco_xe and args.show) or (args.a10 and args.arista and args.cisco_xe and args.cisco_xr and args.show):
     hosts_cisco_xe = open('cisco_xe.txt').readlines()
     cmd_cisco_xe = open('cisco_cmd_xe.txt').readlines()
     cisco_xe =  "cisco_xe"
