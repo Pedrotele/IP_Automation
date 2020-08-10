@@ -70,7 +70,7 @@ def run_script(host_ip, vendor, cmds):
         "ip": host_ip,
         "username": uname,
         "password": passwd,
-        "session_log": (str(date)+"_"+str(vendor)+"_"+(str(host_ip)).strip()+"_"+str(hour)+".txt").replace(" ", ""),
+        "session_log": str(date)+"_"+str(vendor)+"_"+(str(host_ip)).strip()+"_"+str(hour)+".txt",
         "secret": secret
         }
 
