@@ -1,0 +1,203 @@
+#!/usr/bin/python3
+
+
+#This script aims to automate the commands into IP Network devices for Sanity Checks, configurations and so on
+
+##########################################
+#           STE VNO AUTOMATION v1        #
+#                                        #
+# Written by: Pedro Henrique de O Pinto  #
+# Email: popi@idirect.net                #
+# Copyright (c) 2020                     #
+#                                        #
+##########################################
+
+
+
+#from multiprocessing import Pool
+from getpass import getpass
+from netmiko import ConnectHandler
+from napalm import get_network_driver
+from time import time
+from time import sleep
+from datetime import date
+import datetime
+import argparse
+import pyfiglet
+import sys
+
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-1", "--vno1", help="VNO Type 1 Configuration", action="store_true")
+parser.add_argument("-2", "--vno2", help="VNO Type 2 Configuration", action="store_true")
+parser.add_argument("-a", "--vnoa", help="VNO Type A Configuration", action="store_true")
+parser.add_argument("-b", "--vnob", help="VNO Type B Configuration", action="store_true")
+parser.add_argument("-p", "--print", help="Create and Print Configuration", action="store_true")
+parser.add_argument("-c", "--commit", help="Execute Configuration", action="store_true")
+parser.add_argument("-V", "--version", help="show program version", action="store_true")
+args = parser.parse_args()
+send = vars(parser.parse_args())
+
+
+if args.version:
+    print("This is the Yahsat VNO Automation version 1")
+    quit()
+
+
+ascii_banner = pyfiglet.figlet_format("EIP VNO Automation")
+print(ascii_banner)
+print('Copyright (c) 2020')
+
+print('\nPlease, pass the following commands as an argument when runnin the program')
+
+print('''\n 
+          -h, --help     show this help message and exit 
+          -1, --vno1     VNO Type 1 Configuration
+          -2, --vno2     VNO Type 2 Configuration
+          -a, --vnoa     VNO Type A Configuration
+          -b, --vnob     VNO Type B Configuration
+          -p, --print    Create and Print Configuration
+          -c, --commit   Execute Configuration
+          -V, --version  show program version ''')
+
+def vtypeb():
+
+    conf_vsw1 = open('VNO_'+str(vno_id)+'_TypeB_VSW-1.txt', 'w')
+
+    conf_vsw1.writelines(['\nvlan '+str(1279+vno_id), '\nDATA_VNO_'+str(vno_id)+'_INTERNET', '\n', '\ninterface Ethernet'+str(int_vsw), '\ndescription TO_VNO-'+str(vno_id),
+ '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\nswitchport mode trunk', '\n', '\ninterface Ethernet22', '\ndescription TO_GW-CWS-2_port22',
+ '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\nswitchport mode trunk', '\n', '\ninterface Port-Channel99', '\nswitchport trunk allowed vlan add '+str(1279+vno_id)])
+
+    conf_vsw1.close()
+
+    conf_vsw1 = open('VNO_'+str(vno_id)+'_TypeB_VSW-1.txt', 'r')
+
+    print('\n###### VSW-1 #######')
+
+    print(conf_vsw1.read())
+
+    conf_vsw2 = open('VNO_'+str(vno_id)+'_TypeB_VSW-2.txt', 'w')
+
+    conf_vsw2.writelines(['\nvlan '+str(1279+vno_id), '\nDATA_VNO_'+str(vno_id)+'_INTERNET', '\n', '\ninterface Ethernet'+str(int_vsw), '\ndescription TO_VNO-'+str(vno_id),
+ '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\nswitchport mode trunk', '\n', '\ninterface Ethernet22', '\ndescription TO_GW-CWS-2_port22',
+ '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\nswitchport mode trunk', '\n', '\ninterface Port-Channel99', '\nswitchport trunk allowed vlan add '+str(1279+vno_id)])
+
+    conf_vsw2.close()
+
+    conf_vsw2 = open('VNO_'+str(vno_id)+'_TypeB_VSW-2.txt', 'r')
+
+    print('\n###### VSW-2 #######')
+
+    print(conf_vsw2.read())
+
+def ctypeb():
+
+    conf_csw1 = open('VNO_'+str(vno_id)+'_TypeB_CSW-1.txt', 'w')
+
+    conf_csw1.writelines(['\ninterface Ethernet9', '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\n', '\ninterface Ethernet22', '\nswitchport trunk allowed vlan add '+str(1279+vno_id)])
+
+    conf_csw1.close()
+
+    conf_csw1 = open('VNO_'+str(vno_id)+'_TypeB_CSW-1.txt', 'r')
+
+    print('\n###### CSW-1 #######')
+
+    print(conf_csw1.read())
+
+    conf_csw2 = open('VNO_'+str(vno_id)+'_TypeB_CSW-2.txt', 'w')
+
+    conf_csw2.writelines(['\ninterface Ethernet9', '\nswitchport trunk allowed vlan add '+str(1279+vno_id), '\n', '\ninterface Ethernet22', '\nswitchport trunk allowed vlan add '+str(1279+vno_id)])
+
+    conf_csw2.close()
+
+    conf_csw2 = open('VNO_'+str(vno_id)+'_TypeB_CSW-2.txt', 'r')
+
+    print('\n###### CSW-2 #######')
+
+    print(conf_csw2.read())
+
+
+#################################################################
+
+#NAPALM AUTOMATION
+
+# Creating variables for username and password
+
+def vno_b(host_ip, vendor):
+
+    print('Connecting to host_ip...')
+
+    driver = get_network_driver(vendor)
+
+    optional_args = {'enable_password': 'enable', 'secret': 'enable'}
+
+    try:
+        device = driver(host_ip, uname, passwd, optional_args=optional_args)
+
+    except:
+        print("\nConnection lost to host:", vendor, host_ip, "Please, check your credentials !!")
+        quit()
+
+    device.open()
+
+    device.get_interfaces()
+
+    device.close()
+
+    
+    device.load_replace_candidate(filename='new_good.conf')
+    
+    print(device.compare_config())
+
+    commit = str(input('Are you happy with the changes? [y/n]'))
+    if commit == y:
+        device.commit_config()
+    elif commit == n:
+        device.discard_config()
+
+
+    roolback = str(input('do you want rollback the changes? [y/n]'))
+    if roolback == y:
+        device.rollback()
+    elif roolback == n:
+        device.close()
+    
+
+if args.vnob and args.print:
+
+    print("\nPlease, insert the values for VNO Type B Configuration :\n")
+
+    vno_id = str(input('\nEnter the new VNO name:'))
+
+    vno_id = int(input('\nEnter the new VNO ID:'))
+
+    int_vsw = int(input('\nEnter the VSW interface for VNO '+str(vno_id)+':'))
+
+    vno_ipv4 = str(input('\nEnter the customer IPv4 range:'))
+
+    vno_ipv6 = str(input('\nEnter the customer IPv6 range:')) 
+
+    print("\nCreating and Printing config files for VNO "+str(vno_id)+" Type B\n")
+
+    vtypeb()
+
+    ctypeb()
+
+
+if args.vnob and args.commit:
+
+    uname = input("Username: ")
+    passwd = getpass("Password: ")
+    enable = getpass("Enable Password (if nedeed): ")
+    arista = 'eos'
+    cisco_xr = 'iosxr'
+
+    for ip in vsw_hosts:
+        vno_b(ip, arista)
+
+    for ip in csw_hosts:
+        vno_b(ip, arista)
+
+    for ip in asr_hosts:
+        vno_b(ip, cisco_xr)
