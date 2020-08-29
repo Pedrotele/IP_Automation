@@ -22,6 +22,7 @@ from time import sleep
 from datetime import date
 import datetime
 import argparse
+import pyfiglet
 import sys
 
 
@@ -45,7 +46,26 @@ if args.version:
     quit()
 
 
-print("#### STE Enterprise IP Automation ####\n")
+ascii_banner = pyfiglet.figlet_format("STE Enterprise IP Automation")
+print(ascii_banner)
+
+print('Copyright (c) 2020')
+
+print('\nPlease, pass the following commands as an argument when runnin the program')
+
+print('''\n 
+          -h, --help            show this help message and exit
+          -V, --version         show program version
+          -s, --show            Fetch SHOW commands
+          -c, --conf            Send CONFIG commands
+          -a, --arista          Run only for Arista devices
+          -r, --cisco_xr        Run only for Cisco XR devices
+          -e, --cisco_xe        Run only for Cisco XE devices
+          -t, --a10             Run only for a10 devices
+          -n COMMAND, --command COMMAND Specify single SHOW command to be fetched ''')
+
+
+#print("#### STE Enterprise IP Automation ####\n")
 
 
 # Creating variables for username and password
@@ -112,7 +132,7 @@ def run_script(host_ip, vendor, cmds):
                 sleep(2)
 
             elif args.conf: 
-                #output = net_connect.send_config_set(commands)  # If you want to send configuration commands rather than "show commands", please uncomment this line 
+                output = net_connect.send_config_set(commands)  # If you want to send configuration commands rather than "show commands", please uncomment this line 
                 print('\n====>', vendor, host_ip, commands,'\n')
                 print(output)
                 print('\n--- Elapsed time=', time()-starting_time)
